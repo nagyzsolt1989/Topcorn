@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Topcorn</string>
+    <string name="title_activity_detail">DetailActivity</string>
+    <string name="detail_error_message">Movie data not available</string>
+</resources>
