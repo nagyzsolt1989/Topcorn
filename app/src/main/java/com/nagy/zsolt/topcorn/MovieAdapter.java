@@ -5,10 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nagy.zsolt.topcorn.model.Movie;
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by Zsolti on 2018.03.07..
@@ -17,16 +20,16 @@ import com.nagy.zsolt.topcorn.model.Movie;
 public class MovieAdapter extends BaseAdapter {
 
     private final Context mContext;
-    private final String[] movies;
+    private final String[] moviePosterPath;
 
-    public MovieAdapter(Context context, String[] movies){
+    public MovieAdapter(Context context, String[] moviePosterPath){
         this.mContext=context;
-        this.movies=movies;
+        this.moviePosterPath=moviePosterPath;
     }
 
     @Override
     public int getCount() {
-        return movies.length;
+        return moviePosterPath.length;
     }
 
     @Override
@@ -42,20 +45,17 @@ public class MovieAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup viewGroup) {
 
-        final String movie = movies[position];
+        int posterlWidth = 300;
+        int posterHeight = 450;
 
         if (convertView == null) {
             final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
             convertView = layoutInflater.inflate(R.layout.grid_item, null);
         }
 
-        // 3
-        final ImageView imageView = (ImageView)convertView.findViewById(R.id.imageview_cover_art);
-        final TextView nameTextView = (TextView)convertView.findViewById(R.id.textview_book_name);
-
-        // 4
-//        imageView.setImageResource(movie.getPosterPath());
-        nameTextView.setText(movies[position]);
+        final ImageView imageView = (ImageView)convertView.findViewById(R.id.imageview_movie_poster);
+        Picasso.with(mContext).load("http://image.tmdb.org/t/p/w185/"+moviePosterPath[position]).into(imageView);
+        imageView.setLayoutParams(new FrameLayout.LayoutParams(posterlWidth, posterHeight));
 
         return convertView;
     }

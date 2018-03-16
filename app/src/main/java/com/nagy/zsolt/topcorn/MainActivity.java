@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     final String KEY_URL_TMDB = "http://image.tmdb.org/t/p/.";
     final String KEY_PSTR_SIZE = "w185";
     String[] movieTitles;
+    String[] moviePosterPath;
     JSONArray moviesJsonArray;
     Context mContext;
 
@@ -77,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
                     moviesJsonArray = data.getJSONArray("results");
-                    movieTitles = new String[moviesJsonArray.length()];
+                    moviePosterPath = new String[moviesJsonArray.length()];
                     for (int i = 0; i < moviesJsonArray.length(); i++) {
                         JSONObject obj = moviesJsonArray.getJSONObject(i);
-                        movieTitles[i] = obj.optString("title");
+                        moviePosterPath[i] = obj.optString("poster_path");
                     }
-                    MovieAdapter movieAdapter = new MovieAdapter(mContext, movieTitles);
+                    MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
                     gridView.setAdapter(movieAdapter);
                     gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override

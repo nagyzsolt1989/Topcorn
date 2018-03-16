@@ -1,19 +1,30 @@
 package com.nagy.zsolt.topcorn;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.nagy.zsolt.topcorn.utils.JsonUtils;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -23,12 +34,19 @@ public class DetailActivity extends AppCompatActivity {
     JSONArray array;
     Movie movie;
 
+    @BindView(R.id.details_poster_iv) ImageView posterIV;
+    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
+    @BindView(R.id.my_toolbar) Toolbar toolbar;
+    @BindView(R.id.movie_title) TextView mMovieTitle;
+    @BindView(R.id.movie_overview) TextView mMovieOverview;
+    @BindView(R.id.ratingBar) RatingBar mRatingBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        ButterKnife.bind(this);
+
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -60,7 +78,30 @@ public class DetailActivity extends AppCompatActivity {
 //            }
 //        });
 
-        setTitle(movie.getTitle());
+        collapsingToolbarLayout.setTitleEnabled(false);
+        toolbar.setTitle(movie.getTitle());
+
+        System.out.println("http://image.tmdb.org/t/p/w780/"+movie.getPosterPath());
+        Picasso.with(this)
+                .load("http://image.tmdb.org/t/p/w780/"+movie.getPosterPath())
+                .into(posterIV);
+
+        populateUI(movie);
+    }
+
+    private void populateUI(Movie movie) {
+        if (movie == null) {
+            // Movie data unavailable
+            closeOnError();
+            return;
+        } else {
+            String releaseDate = movie.getReleaseDate();
+            LayerDrawable stars = (LayerDrawable) mRatingBar.getProgressDrawable();
+            stars.getDrawable(2).setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_ATOP);
+            String[] releaseDateParts = releaseDate.split("-");
+            mMovieTitle.setText(movie.getTitle() + " (" + releaseDateParts[0] + ")");
+            mMovieOverview.setText(movie.getOverview());
+        }
     }
 
     private void closeOnError() {

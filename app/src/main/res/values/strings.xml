@@ -2,4 +2,11 @@
     <string name="app_name">Topcorn</string>
     <string name="title_activity_detail">DetailActivity</string>
     <string name="detail_error_message">Movie data not available</string>
+    <string name="movie_poster">Movie poster</string>
+    <string name="title_activity_genre">Genre</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>
