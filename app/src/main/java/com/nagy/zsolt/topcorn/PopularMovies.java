@@ -1,15 +1,16 @@
 package com.nagy.zsolt.topcorn;
 
+/**
+ * Created by Zsolti on 2018.03.19..
+ */
+
 import android.content.Context;
 import android.content.Intent;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -22,72 +23,34 @@ import com.nagy.zsolt.topcorn.utils.MovieAdapter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class PopularMovies extends Fragment {
 
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
     String[] moviePosterPath;
     JSONArray moviesJsonArray;
     Context mContext;
-
-    ArrayList<String> list = new ArrayList<String>();
     GridView gridView;
+    MovieAdapter movieadapter;
+
+    public PopularMovies() {
+        // Required empty public constructor
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
-
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-
-//        gridView = (GridView) findViewById(R.id.gridview);
-
-        mContext = getApplicationContext();
-//        getPopularMovies();
+        mContext = getContext();
+        getPopularMovies();
     }
 
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new PopularMovies(), "Popular");
-        adapter.addFragment(new TopRatedMovies(), "Top Rated");
-        adapter.addFragment(new FavouriteMovies(), "Favourites");
-        viewPager.setAdapter(adapter);
-    }
-
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View layout = inflater.inflate(R.layout.fragment_popular_movies, container, false);
+        gridView = layout.findViewById(R.id.popular_gridview);
+        getPopularMovies();
+        return layout;
     }
 
     public void getPopularMovies() {
@@ -95,10 +58,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url =  "http://api.themoviedb.org/3/movie/popular?api_key="+mContext.getString(R.string.movie_db_api_key);
+            String url ="http://api.themoviedb.org/3/movie/popular?api_key="+mContext.getString(R.string.movie_db_api_key);
+            System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
-            getapiRequest.request(MainActivity.this, fetchGetResultListener, url);
-            Toast.makeText(MainActivity.this, "GET API called", Toast.LENGTH_SHORT).show();
+            getapiRequest.request(getContext(), fetchGetResultListener, url);
+//            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -131,11 +95,11 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                 } else {
-                    RequestQueueService.showAlert("Error! No data fetched", MainActivity.this);
+                    RequestQueueService.showAlert("Error! No data fetched", getActivity());
                 }
             } catch (
                     Exception e) {
-                RequestQueueService.showAlert("Something went wrong", MainActivity.this);
+                RequestQueueService.showAlert("Something went wrong", getActivity());
                 e.printStackTrace();
             }
 
@@ -145,20 +109,21 @@ public class MainActivity extends AppCompatActivity {
         public void onFetchFailure(String msg) {
             RequestQueueService.cancelProgressDialog();
             //Show if any error message is there called from GETAPIRequest class
-            RequestQueueService.showAlert(msg, MainActivity.this);
+            RequestQueueService.showAlert(msg, getActivity());
         }
 
         @Override
         public void onFetchStart() {
             //Start showing progressbar or any loader you have
-            RequestQueueService.showProgressDialog(MainActivity.this);
+            RequestQueueService.showProgressDialog(getActivity());
         }
     };
 
     private void launchDetailActivity(int position) {
-        Intent intent = new Intent(this, DetailActivity.class);
+        Intent intent = new Intent(getContext(), DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_POSITION, position);
         intent.putExtra(DetailActivity.EXTRA_JSONARRAY, moviesJsonArray.toString());
         startActivity(intent);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.nagy.zsolt.topcorn.utils;
 
 import com.nagy.zsolt.topcorn.model.Movie;
+import com.nagy.zsolt.topcorn.model.MovieDetails;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,6 +63,40 @@ public class JsonUtils {
             return null;
         }
     }
+
+    public static MovieDetails parseMovieDetailsJson(String data) {
+
+        String runtime;
+        String tagline;
+        List<String> genres;
+        String imdb_id;
+
+        final String KEY_RUNTIME = "runtime";
+        final String KEY_TAGLINE = "tagline";
+        final String KEY_GENRES = "genres";
+        final String KEY_IMDB_ID = "imdb_id";
+
+        try {
+
+            JSONObject movieDetailsJson = new JSONObject(data);
+            genres = new ArrayList<>();
+
+            runtime = movieDetailsJson.optString(KEY_RUNTIME);
+            tagline = movieDetailsJson.optString(KEY_TAGLINE);
+            JSONArray genreJsonArray = movieDetailsJson.getJSONArray(KEY_GENRES);
+            for (int i = 0; i < genreJsonArray.length(); i++) {
+                genres.add(genreJsonArray.getJSONObject(i).getString("name"));
+            }
+            imdb_id = movieDetailsJson.optString(KEY_IMDB_ID);
+
+            return new MovieDetails(runtime, tagline, genres, imdb_id);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     private static ArrayList<String> convertJsonArrayToList(JSONArray jsonArray) {
         ArrayList<String> list = new ArrayList<>();

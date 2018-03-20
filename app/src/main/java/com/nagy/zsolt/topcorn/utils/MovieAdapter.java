@@ -1,4 +1,4 @@
-package com.nagy.zsolt.topcorn;
+package com.nagy.zsolt.topcorn.utils;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.nagy.zsolt.topcorn.R;
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.squareup.picasso.Picasso;
 

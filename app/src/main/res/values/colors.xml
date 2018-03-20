@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#37474F</color>
     <color name="colorAccent">#0277BD</color>
     <color name="colorLight">#ECEFF1</color>
+    <color name="pink">#dd00ff</color>
+    <color name="ratingStarColor">#FFD700</color>
+    <color name="fabbackground">#BBBBBB</color>
 </resources>

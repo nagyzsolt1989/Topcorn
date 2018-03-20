@@ -18,7 +18,7 @@ import org.json.JSONObject;
 
 public class GETAPIRequest {
 
-    public void request(final Context context, final FetchDataListener listener) throws JSONException {
+    public void request(final Context context, final FetchDataListener listener, String url) throws JSONException {
         if (listener != null) {
             //call onFetchComplete of the listener
             //to show progress dialog
@@ -26,16 +26,13 @@ public class GETAPIRequest {
             listener.onFetchStart();
         }
 
-        String url =  "http://api.themoviedb.org/3/movie/popular?api_key="+context.getString(R.string.movie_db_api_key);
-        //add extension api url received from caller
-        //and make full api
         JsonObjectRequest postRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
                             if (listener != null) {
-                                if (response.has("results")) {
+                                if (response.has("results") || response.has("tagline")) {
                                     //received response
                                     //call onFetchComplete of the listener
                                     listener.onFetchComplete(response);

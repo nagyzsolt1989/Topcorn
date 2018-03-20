@@ -1,24 +1,14 @@
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/my_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@null"
-        android:elevation="4dp"
-        app:titleTextColor="@color/cardview_light_background"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 xmlns:diagonal="http://schemas.android.com/tools"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:fitsSystemWindows="true">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="359dp"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
@@ -26,21 +16,101 @@
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="400dp"
+            android:background="@color/colorLight"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:expandedTitleMarginEnd="64dp"
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <ImageView
-                android:id="@+id/details_poster_iv"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/movie_poster"
-                android:fitsSystemWindows="true"
-                android:scaleType="centerCrop"
-                app:layout_collapseMode="parallax"/>
+                android:layout_height="match_parent">
+
+                <com.github.florent37.diagonallayout.DiagonalLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    app:diagonal_angle="2"
+                    diagonal:diagonal_direction="left"
+                    diagonal:diagonal_position="bottom">
+
+                    <android.support.constraint.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:id="@+id/details_poster_iv"
+                            android:layout_width="match_parent"
+                            android:layout_height="300dp"
+                            android:adjustViewBounds="false"
+                            android:contentDescription="@string/movie_poster"
+                            android:fitsSystemWindows="true"
+                            android:scaleType="centerCrop"
+                            app:layout_collapseMode="parallax"
+                            app:layout_constraintStart_toStartOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/movie_title"
+                            android:layout_width="160dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="48dp"
+                            android:layout_marginEnd="100dp"
+                            android:text="Title Placeholder"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                            app:layout_constraintBottom_toBottomOf="@+id/details_poster_iv"
+                            app:layout_constraintEnd_toEndOf="@+id/details_poster_iv"/>
+
+                        <me.zhanghai.android.materialratingbar.MaterialRatingBar
+                            android:id="@+id/ratingbar"
+                            style="@style/Widget.MaterialRatingBar.RatingBar.Medium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:layout_constraintStart_toStartOf="@+id/movie_title"
+                            app:layout_constraintTop_toBottomOf="@+id/movie_title"
+                            app:mrb_fillBackgroundStars="true"
+                            app:mrb_progressBackgroundTint="@color/colorPrimaryDark"
+                            app:mrb_progressTint="@color/ratingStarColor"/>
+
+                        <TextView
+                            android:id="@+id/movie_release_year"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="5dp"
+                            android:text="2009"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                            app:layout_constraintStart_toEndOf="@+id/ratingbar"
+                            app:layout_constraintTop_toBottomOf="@+id/movie_title"/>
+
+                        <TextView
+                            android:id="@+id/movie_duration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="5dp"
+                            android:text="139 min"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                            app:layout_constraintStart_toEndOf="@+id/movie_release_year"
+                            app:layout_constraintTop_toBottomOf="@+id/movie_title"/>
+
+                    </android.support.constraint.ConstraintLayout>
+
+                </com.github.florent37.diagonallayout.DiagonalLayout>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/button_play"
+                    android:layout_width="58dp"
+                    android:layout_height="58dp"
+                    android:layout_marginStart="57dp"
+                    android:layout_marginTop="268dp"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_play_arrow"
+                    app:backgroundTint="@color/ratingStarColor"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+            </android.support.constraint.ConstraintLayout>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -56,7 +126,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@color/colorPrimary"
             android:orientation="vertical">
 
@@ -64,7 +134,7 @@
                 android:id="@+id/movie_details"
                 layout="@layout/movie_details"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"/>
 
         </LinearLayout>
