@@ -1,6 +1,7 @@
 package com.nagy.zsolt.topcorn.utils;
 
 import com.nagy.zsolt.topcorn.model.Movie;
+import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
 
 import org.json.JSONArray;
@@ -90,6 +91,32 @@ public class JsonUtils {
             imdb_id = movieDetailsJson.optString(KEY_IMDB_ID);
 
             return new MovieDetails(runtime, tagline, genres, imdb_id);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static MovieCredits parseMovieCreditsJson(String data) {
+
+        String profilePath;
+        String name;
+        String character;
+
+        final String KEY_PROFILE_PATH = "profile_path";
+        final String KEY_ACTOR_NAME = "name";
+        final String KEY_CHARACTER_NAME = "character";
+
+        try {
+
+            JSONObject movieJson = new JSONObject(data);
+
+            profilePath = movieJson.optString(KEY_PROFILE_PATH);
+            name = movieJson.optString(KEY_ACTOR_NAME);
+            character = movieJson.optString(KEY_CHARACTER_NAME);
+
+            return new MovieCredits(profilePath, name, character);
 
         } catch (JSONException e) {
             e.printStackTrace();

@@ -13,13 +13,10 @@ package com.nagy.zsolt.topcorn;
         import android.view.ViewGroup;
         import android.widget.AdapterView;
         import android.widget.GridView;
-        import android.widget.Toast;
-
         import com.nagy.zsolt.topcorn.api.FetchDataListener;
         import com.nagy.zsolt.topcorn.api.GETAPIRequest;
         import com.nagy.zsolt.topcorn.api.RequestQueueService;
         import com.nagy.zsolt.topcorn.utils.MovieAdapter;
-
         import org.json.JSONArray;
         import org.json.JSONObject;
 
@@ -58,11 +55,10 @@ public class TopRatedMovies extends Fragment {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url =  "http://api.themoviedb.org/3/movie/top_rated?api_key="+mContext.getString(R.string.movie_db_api_key);
+            String url =  getString(R.string.movieDbApi) + getString(R.string.topRated) + getString(R.string.apiKeyParameter)+mContext.getString(R.string.movie_db_api_key);
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(getContext(), fetchGetResultListener, url);
-//            Toast.makeText(getContext(), "GET API called", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,12 +75,11 @@ public class TopRatedMovies extends Fragment {
             try {
                 //Check result sent by our GETAPIRequest class
                 if (data != null) {
-                    System.out.println("Nem nulla a json");
-                    moviesJsonArray = data.getJSONArray("results");
+                    moviesJsonArray = data.getJSONArray(getString(R.string.results));
                     moviePosterPath = new String[moviesJsonArray.length()];
                     for (int i = 0; i < moviesJsonArray.length(); i++) {
                         JSONObject obj = moviesJsonArray.getJSONObject(i);
-                        moviePosterPath[i] = obj.optString("poster_path");
+                        moviePosterPath[i] = obj.optString(getString(R.string.posterPath));
                     }
                     MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
                     gridView.setAdapter(movieAdapter);
@@ -94,13 +89,12 @@ public class TopRatedMovies extends Fragment {
                             launchDetailActivity(position);
                         }
                     });
-
                 } else {
-                    RequestQueueService.showAlert("Error! No data fetched", getActivity());
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), getActivity());
                 }
             } catch (
                     Exception e) {
-                RequestQueueService.showAlert("Something went wrong", getActivity());
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), getActivity());
                 e.printStackTrace();
             }
 

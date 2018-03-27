@@ -32,7 +32,7 @@ public class GETAPIRequest {
                     public void onResponse(JSONObject response) {
                         try {
                             if (listener != null) {
-                                if (response.has("results") || response.has("tagline")) {
+                                if (response.has("results") || response.has("tagline") || response.has("cast")){
                                     //received response
                                     //call onFetchComplete of the listener
                                     listener.onFetchComplete(response);
