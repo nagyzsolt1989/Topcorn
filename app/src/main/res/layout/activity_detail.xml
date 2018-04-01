@@ -98,12 +98,22 @@
 
                 </com.github.florent37.diagonallayout.DiagonalLayout>
 
+                <ImageView
+                    android:id="@+id/trailer_poster"
+                    android:layout_width="100dp"
+                    android:layout_height="150dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="190dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/button_play"
                     android:layout_width="58dp"
                     android:layout_height="58dp"
-                    android:layout_marginStart="57dp"
-                    android:layout_marginTop="268dp"
+                    android:layout_marginStart="45dp"
+                    android:layout_marginTop="235dp"
                     android:scaleType="center"
                     android:src="@drawable/ic_play_arrow"
                     app:backgroundTint="@color/ratingStarColor"

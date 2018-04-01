@@ -55,13 +55,13 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.MyViewHo
         holder.name.setText(names[position]);
         holder.character.setText(characters[position]);
         Picasso.with(mContext)
-                .load("http://image.tmdb.org/t/p/w780/" + mProfilePath[position])
+                .load("http://image.tmdb.org/t/p/w92/" + mProfilePath[position])
                 .transform(new CropCircleTransformation())
                 .into(holder.profilePicture);
     }
 
     @Override
     public int getItemCount() {
-        return mProfilePath.length;
+        return names.length;
     }
 }

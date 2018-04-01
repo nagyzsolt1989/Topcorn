@@ -1,10 +1,14 @@
 package com.nagy.zsolt.topcorn;
 
 import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -23,6 +27,7 @@ import com.adroitandroid.chipcloud.ChipCloud;
 import com.nagy.zsolt.topcorn.api.FetchDataListener;
 import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
+import com.nagy.zsolt.topcorn.data.FavourtiesContract;
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
@@ -35,8 +40,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.URL;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import jp.wasabeef.picasso.transformations.GrayscaleTransformation;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -45,8 +54,8 @@ public class DetailActivity extends AppCompatActivity {
     public static final String EXTRA_JSONARRAY = "extra_jsonarray";
 
     private LinearLayoutManager mLayoutManager;
-    String[] profilePath, names, characters;
-    JSONArray creditsJsonArray;
+    String[] profilePath, names, characters, trailers;
+    JSONArray creditsJsonArray, trailersJsonArray;
     JSONArray array;
     String jsonObject;
     Movie movie;
@@ -61,14 +70,16 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.ratingbar) RatingBar mRatingBar;
     @BindView(R.id.movie_release_year) TextView mReleaseYear;
     @BindView(R.id.movie_duration) TextView mMovieRuntime;
+    @BindView(R.id.trailer_poster) ImageView mTrailerPoster;
     @BindView(R.id.movie_overview) TextView mMovieOverview;
     @BindView(R.id.movie_genre) ChipCloud mMovieGenre;
+    @BindView(R.id.button_play) FloatingActionButton mWatchTrailer;
     @BindView(R.id.button_favourite) FloatingActionButton mFavouriteFab;
     @BindView(R.id.button_watchlist) FloatingActionButton mWatchlistFab;
     @BindView(R.id.button_imdb) FloatingActionButton mIMDBFab;
     @BindView(R.id.credits_recycler_view) RecyclerView mCreditsRecyclerView;
     @BindView(R.id.movie_tagline) TextView mMovieTagline;
-
+//    @BindView(R.id.progreassIndicator) TextView mLoadingIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +107,8 @@ public class DetailActivity extends AppCompatActivity {
             movie = JsonUtils.parseMovieJson(array.getJSONObject(position).toString());
 
             getMovieDetailsFromServer();
+            getMovieTrailerFromServer();
             getMovieCreditsFromServer();
-
 //            System.out.print(jsonObject);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -106,9 +117,47 @@ public class DetailActivity extends AppCompatActivity {
         collapsingToolbarLayout.setTitleEnabled(false);
 
         Picasso.with(this)
-                .load("http://image.tmdb.org/t/p/w780/" + movie.getPosterPath())
+                .load("http://image.tmdb.org/t/p/w780/" + movie.getBackdropPath())
                 .into(posterIV);
+
+        Picasso.with(this)
+                .load("http://image.tmdb.org/t/p/w780/" + movie.getPosterPath())
+//                .transform(new GrayscaleTransformation())
+                .into(mTrailerPoster);
+
     }
+
+//    public class ApiQueryTask extends AsyncTask<URL, Void, String> {
+//
+//        // COMPLETED (26) Override onPreExecute to set the loading indicator to visible
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//            mLoadingIndicator.setVisibility(View.VISIBLE);
+//        }
+//
+//        @Override
+//        protected void doInBackground(URL... params) {
+//            getMovieDetailsFromServer();
+//            getMovieTrailerFromServer();
+//            getMovieCreditsFromServer();
+//            return githubSearchResults;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String githubSearchResults) {
+//            // COMPLETED (27) As soon as the loading is complete, hide the loading indicator
+//            mLoadingIndicator.setVisibility(View.INVISIBLE);
+//            if (githubSearchResults != null && !githubSearchResults.equals("")) {
+//                // COMPLETED (17) Call showJsonDataView if we have valid, non-null results
+//                showJsonDataView();
+//                mSearchResultsTextView.setText(githubSearchResults);
+//            } else {
+//                // COMPLETED (16) Call showErrorMessage if the result is null in onPostExecute
+//                showErrorMessage();
+//            }
+//        }
+//    }
 
     private void populateUI(final Movie movie, final MovieDetails movieDetails) {
         if ((movie == null) || (movieDetails == null)) {
@@ -127,6 +176,17 @@ public class DetailActivity extends AppCompatActivity {
             }
             mMovieOverview.setText(movie.getOverview());
             mMovieTagline.setText(movieDetails.getTagline());
+
+            mWatchTrailer.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    System.out.println(movieDetails.getImdb_id());
+                    intent.setData(Uri.parse(getString(R.string.youtube) + trailers[0]));
+                    startActivity(intent);
+                }
+            });
+
             mFavouriteFab.setOnClickListener(new View.OnClickListener() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 @Override
@@ -135,9 +195,11 @@ public class DetailActivity extends AppCompatActivity {
                         addToFavourites = true;
                         Drawable pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
                         mFavouriteFab.setImageDrawable(pinkFavourite);
+                        addToFavourites();
                         Toast.makeText(DetailActivity.this, movie.getTitle() + getString(R.string.addedToFavourites), Toast.LENGTH_SHORT).show();
                     } else if (addToFavourites) {
                         addToFavourites = false;
+                        removeFromFavourites();
                         Drawable blackFavourite = getResources().getDrawable(R.drawable.ic_favorite);
                         mFavouriteFab.setImageDrawable(blackFavourite);
                     }
@@ -175,10 +237,6 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    private void populateCredits(MovieCredits movieCredits){
-
-    }
-
     public void getMovieDetailsFromServer() {
         try {
             //Create Instance of GETAPIRequest and call it's
@@ -187,6 +245,19 @@ public class DetailActivity extends AppCompatActivity {
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(DetailActivity.this, fetchGetResultListener, url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getMovieTrailerFromServer() {
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.trailers) + getString(R.string.apiKeyParameter) + mContext.getString(R.string.movie_db_api_key);
+            System.out.println(url);
+            GETAPIRequest getapiRequest = new GETAPIRequest();
+            getapiRequest.request(DetailActivity.this, fetchTrailerResultListener, url);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -203,6 +274,38 @@ public class DetailActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Adds a new movie to Favourites DB
+     */
+    public long addToFavourites() {
+        //ContentValues instance to pass the values onto the insert query
+        ContentValues cv = new ContentValues();
+
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_BACKDROP, movie.getBackdropPath());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_POSTER, movie.getPosterPath());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getReleaseDate());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_RATING, movie.getVoteAvg());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_DURATION, movieDetails.getRuntime());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_OVERVIEW, movie.getOverview());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TAGLINE, movieDetails.getTagline());
+        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_IMDB, movieDetails.getImdb_id());
+
+        // COMPLETED (8) call insert to run an insert query on TABLE_NAME with the ContentValues created
+        return MainActivity.mDb.insert(FavourtiesContract.FavouritesEntry.TABLE_NAME, null, cv);
+    }
+
+    /**
+     * Removes the movie from Favourites
+     */
+    public void removeFromFavourites(){
+
+        String selection = FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
+        String[] selectionArgs = {movie.getTitle()};
+        int deletedRows = MainActivity.mDb.delete(FavourtiesContract.FavouritesEntry.TABLE_NAME, selection, selectionArgs);
+
     }
 
     private void closeOnError() {
@@ -222,6 +325,60 @@ public class DetailActivity extends AppCompatActivity {
                 if (data != null) {
                     movieDetails = JsonUtils.parseMovieDetailsJson(data.toString());
                     populateUI(movie, movieDetails);
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), DetailActivity.this);
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, DetailActivity.this);
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(DetailActivity.this);
+        }
+    };
+
+    FetchDataListener fetchTrailerResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONObject data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    trailersJsonArray = data.getJSONArray("results");
+//                    System.out.println(trailersJsonArray);
+                    trailers = new String[trailersJsonArray.length()];
+                    for (int i = 0; i < trailersJsonArray.length(); i++) {
+                        JSONObject obj = trailersJsonArray.getJSONObject(i);
+                        trailers[i] = obj.optString("key");
+                    }
+                    mCreditsRecyclerView.setHasFixedSize(true);
+                    mLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
+                    mCreditsRecyclerView.setLayoutManager(mLayoutManager);
+                    CreditsAdapter creditsAdapter = new CreditsAdapter(getApplicationContext(), profilePath, names, characters);
+                    mCreditsRecyclerView.setAdapter(creditsAdapter);
+
+//                    mCreditsRecyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                        @Override
+//                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                            launchDetailActivity(position);
+//                        }
+//                    });
+
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
                 }

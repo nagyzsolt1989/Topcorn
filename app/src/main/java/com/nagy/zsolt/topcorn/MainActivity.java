@@ -2,6 +2,7 @@ package com.nagy.zsolt.topcorn;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import com.nagy.zsolt.topcorn.api.FetchDataListener;
 import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
+import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
 import com.nagy.zsolt.topcorn.utils.MovieAdapter;
 
 import org.json.JSONArray;
@@ -27,6 +29,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static SQLiteDatabase mDb;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     String[] moviePosterPath;
@@ -41,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Display app logo
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.popcorn);
+
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
 
@@ -50,9 +59,14 @@ public class MainActivity extends AppCompatActivity {
 //        gridView = (GridView) findViewById(R.id.gridview);
 
         mContext = getApplicationContext();
-//        getPopularMovies();
+
+        FavouritesDBHelper dbHelper = new FavouritesDBHelper(this);
+        mDb = dbHelper.getWritableDatabase();
     }
 
+    /**
+     * Display the category fragments in the tabs of the MainActivity
+     */
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new PopularMovies(), "Popular");
@@ -88,77 +102,5 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
-    }
-
-    public void getPopularMovies() {
-
-        try {
-            //Create Instance of GETAPIRequest and call it's
-            //request() method
-            String url =  "http://api.themoviedb.org/3/movie/popular?api_key="+mContext.getString(R.string.movie_db_api_key);
-            GETAPIRequest getapiRequest = new GETAPIRequest();
-            getapiRequest.request(MainActivity.this, fetchGetResultListener, url);
-            Toast.makeText(MainActivity.this, "GET API called", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    //Implementing interfaces of FetchDataListener for GET api request
-    FetchDataListener fetchGetResultListener = new FetchDataListener() {
-        @Override
-        public void onFetchComplete(JSONObject data) {
-            //Fetch Complete. Now stop progress bar  or loader
-            //you started in onFetchStart
-            RequestQueueService.cancelProgressDialog();
-            try {
-                //Check result sent by our GETAPIRequest class
-                if (data != null) {
-                    moviesJsonArray = data.getJSONArray("results");
-                    moviePosterPath = new String[moviesJsonArray.length()];
-                    for (int i = 0; i < moviesJsonArray.length(); i++) {
-                        JSONObject obj = moviesJsonArray.getJSONObject(i);
-                        moviePosterPath[i] = obj.optString("poster_path");
-                    }
-                    MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
-                    gridView.setAdapter(movieAdapter);
-                    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                            launchDetailActivity(position);
-                        }
-                    });
-
-                } else {
-                    RequestQueueService.showAlert("Error! No data fetched", MainActivity.this);
-                }
-            } catch (
-                    Exception e) {
-                RequestQueueService.showAlert("Something went wrong", MainActivity.this);
-                e.printStackTrace();
-            }
-
-        }
-
-        @Override
-        public void onFetchFailure(String msg) {
-            RequestQueueService.cancelProgressDialog();
-            //Show if any error message is there called from GETAPIRequest class
-            RequestQueueService.showAlert(msg, MainActivity.this);
-        }
-
-        @Override
-        public void onFetchStart() {
-            //Start showing progressbar or any loader you have
-            RequestQueueService.showProgressDialog(MainActivity.this);
-        }
-    };
-
-    private void launchDetailActivity(int position) {
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra(DetailActivity.EXTRA_POSITION, position);
-        intent.putExtra(DetailActivity.EXTRA_JSONARRAY, moviesJsonArray.toString());
-        startActivity(intent);
     }
 }

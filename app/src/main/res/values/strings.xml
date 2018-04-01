@@ -21,4 +21,6 @@
     <string name="results">results</string>
     <string name="posterPath">poster_path</string>
     <string name="credits">/credits</string>
+    <string name="trailers">/videos</string>
+    <string name="youtube">https://www.youtube.com/watch?v=</string>
 </resources>

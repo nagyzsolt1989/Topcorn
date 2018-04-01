@@ -27,10 +27,8 @@ public class PopularMovies extends Fragment {
     JSONArray moviesJsonArray;
     Context mContext;
     GridView gridView;
-    MovieAdapter movieadapter;
 
     public PopularMovies() {
-        // Required empty public constructor
     }
 
     @Override

@@ -23,6 +23,7 @@
                 android:id="@+id/movie_genre"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 app:gravity="center"
                 app:layout_constraintTop_toBottomOf="parent"/>
 
@@ -32,6 +33,7 @@
                 android:layout_height="45dp"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="16dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_favorite"
                 app:backgroundTint="@color/fabbackground"
@@ -45,10 +47,12 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_star"
                 app:backgroundTint="@color/fabbackground"
-                app:layout_constraintStart_toEndOf="@id/button_favourite"/>
+                app:layout_constraintStart_toEndOf="@id/button_favourite"
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/button_imdb"
@@ -63,7 +67,8 @@
                 android:textOff=""
                 android:textOn=""
                 app:backgroundTint="@color/fabbackground"
-                app:layout_constraintStart_toEndOf="@id/button_watchlist"/>
+                app:layout_constraintStart_toEndOf="@id/button_watchlist"
+                app:layout_constraintTop_toTopOf="parent"/>
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/button_watchlist"
@@ -76,14 +81,10 @@
                 android:scaleType="center"
                 android:src="@drawable/ic_list"
                 app:backgroundTint="@color/fabbackground"
-                app:layout_constraintStart_toEndOf="@id/button_rate"/>
+                app:layout_constraintStart_toEndOf="@id/button_rate"
+                app:layout_constraintTop_toTopOf="parent"/>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/credits_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="horizontal"
-                app:layout_constraintTop_toBottomOf="@+id/movie_genre"/>
+
 
             <TextView
                 android:id="@+id/movie_overview"
@@ -91,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:layout_weight="1"
-                app:layout_constraintTop_toBottomOf="@+id/credits_recycler_view"
+                app:layout_constraintTop_toBottomOf="@+id/movie_genre"
                 tools:ignore="MissingConstraints"
                 tools:layout_editor_absoluteX="0dp"
                 tools:text="Determined to prove herself, Officer Judy Hopps, the first bunny on Zootopia's police force, jumps at the chance to crack her first case - even if it means partnering with scam-artist fox Nick Wilde to solve the mystery."/>
@@ -106,6 +107,14 @@
                 app:layout_constraintTop_toBottomOf="@+id/movie_overview"
                 tools:ignore="MissingConstraints"
                 tools:layout_editor_absoluteX="8dp"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/credits_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="181dp"
+                android:layout_marginTop="16dp"
+                android:scrollbars="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/movie_tagline"/>
 
         </android.support.constraint.ConstraintLayout>
 

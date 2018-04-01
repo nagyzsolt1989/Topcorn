@@ -25,6 +25,7 @@ public class JsonUtils {
         String voteAvg;
         String popularity;
         String posterPath;
+        String backdropPath;
         String originalLang;
         List<String> genreIds;
         String overview;
@@ -36,6 +37,7 @@ public class JsonUtils {
         final String KEY_VOTE_AVERAGE = "vote_average";
         final String KEY_POPULARITY = "popularity";
         final String KEY_POSTER_PATH = "poster_path";
+        final String KEY_BACKDROP_PATH = "backdrop_path";
         final String KEY_ORIGINAL_LANGUAGE = "original_language";
         final String KEY_GENRE_IDS = "genre_ids";
         final String KEY_OVERVIEW = "overview";
@@ -50,6 +52,7 @@ public class JsonUtils {
             id = movieJson.optString(KEY_ID);
             voteAvg = movieJson.optString(KEY_VOTE_AVERAGE);
             popularity = movieJson.optString(KEY_POPULARITY);
+            backdropPath = movieJson.optString(KEY_BACKDROP_PATH);
             posterPath = movieJson.optString(KEY_POSTER_PATH);
             originalLang = movieJson.optString(KEY_ORIGINAL_LANGUAGE);
             JSONArray genreJsonArray = movieJson.getJSONArray(KEY_GENRE_IDS);
@@ -57,7 +60,7 @@ public class JsonUtils {
             overview = movieJson.optString(KEY_OVERVIEW);
             releaseDate = movieJson.optString(KEY_RELEASE_DATE);
 
-            return new Movie(title, vote_count, id, voteAvg, popularity, posterPath, originalLang, genreIds, overview, releaseDate);
+            return new Movie(title, vote_count, id, voteAvg, popularity, posterPath, backdropPath, originalLang, genreIds, overview, releaseDate);
 
         } catch (JSONException e) {
             e.printStackTrace();

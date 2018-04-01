@@ -14,6 +14,7 @@ public class Movie {
     private String voteAvg;
     private String popularity;
     private String posterPath;
+    private String backdropPath;
     private String originalLang;
     private List<String> genreIds;
     private String overview;
@@ -25,7 +26,7 @@ public class Movie {
     public Movie() {
     }
 
-    public Movie(String title, String vote_count, String id, String voteAvg, String popularity, String posterPath, String originalLang,
+    public Movie(String title, String vote_count, String id, String voteAvg, String popularity, String posterPath,String backdropPath, String originalLang,
                  List<String> genreIds, String overview, String releaseDate) {
         this.title = title;
         this.vote_count = vote_count;
@@ -33,6 +34,7 @@ public class Movie {
         this.voteAvg = voteAvg;
         this.popularity = popularity;
         this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
         this.originalLang = originalLang;
         this.genreIds = genreIds;
         this.overview = overview;
@@ -85,6 +87,14 @@ public class Movie {
 
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
+    }
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
     }
 
     public String getOriginalLang() {
