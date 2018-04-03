@@ -62,9 +62,9 @@ public class FavouriteMovies extends Fragment {
         View layout = inflater.inflate(R.layout.fragment_favourite_movies, container, false);
         gridView = layout.findViewById(R.id.favourites_gridview);
 
-        for (int i = 0; i < moviePosterPath.length; i++) {
-            System.out.println("Ez van benne" + moviePosterPath[i]);
-        }
+//        for (int i = 0; i < moviePosterPath.length; i++) {
+//            System.out.println("Ez van benne" + moviePosterPath[i]);
+//        }
 
         movieAdapter = new MovieAdapter(getContext(), moviePosterPath);
         gridView.setAdapter(movieAdapter);

@@ -5,11 +5,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -18,7 +17,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -28,26 +26,23 @@ import com.adroitandroid.chipcloud.ChipCloud;
 import com.nagy.zsolt.topcorn.api.FetchDataListener;
 import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
+import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
 import com.nagy.zsolt.topcorn.data.FavourtiesContract;
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
 import com.nagy.zsolt.topcorn.utils.CreditsAdapter;
 import com.nagy.zsolt.topcorn.utils.JsonUtils;
-import com.nagy.zsolt.topcorn.utils.MovieAdapter;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import jp.wasabeef.picasso.transformations.GrayscaleTransformation;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -56,16 +51,16 @@ public class DetailActivity extends AppCompatActivity {
     public static final String EXTRA_JSONARRAY = "extra_jsonarray";
 
     private LinearLayoutManager mLayoutManager;
+    boolean addToFavourites, addedToWatchlist;
     String[] profilePath, names, characters, trailers;
+    ArrayList<String> favouritesList;
     JSONArray creditsJsonArray, trailersJsonArray;
     JSONArray array;
-    String jsonObject;
     Movie movie;
     MovieDetails movieDetails;
-    MovieCredits movieCredits;
-    Context mContext;
-    boolean addToFavourites = false, addedToWatchlist = false;
     Drawable pinkFavourite, blackFavourite;
+    Context mContext;
+    SQLiteDatabase mDb;
 
     @BindView(R.id.details_poster_iv) ImageView posterIV;
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
@@ -93,7 +88,15 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         ButterKnife.bind(this);
 
+        //Initialize variables
         mContext = getApplicationContext();
+        pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
+        blackFavourite = getResources().getDrawable(R.drawable.ic_favorite);
+        addToFavourites = false;
+        addedToWatchlist = false;
+        FavouritesDBHelper dbHelper = new FavouritesDBHelper(mContext);
+        mDb = dbHelper.getReadableDatabase();
+        favouritesList = getFavourites();
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -108,6 +111,10 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         String jsonArray = intent.getStringExtra(EXTRA_JSONARRAY);
+
+        /**
+         * Get movie data from the server
+         */
         try {
             array = new JSONArray(jsonArray);
             movie = JsonUtils.parseMovieJson(array.getJSONObject(position).toString());
@@ -115,14 +122,18 @@ public class DetailActivity extends AppCompatActivity {
             getMovieDetailsFromServer();
             getMovieTrailerFromServer();
             getMovieCreditsFromServer();
-//            System.out.print(jsonObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
-        blackFavourite = getResources().getDrawable(R.drawable.ic_favorite);
+        //Preserve Favourite Fab previous state
+        if (favouritesList.contains(movie.getTitle()))
+        {
+            addToFavourites = true;
+            mFavouriteFab.setImageDrawable(pinkFavourite);
+        }
 
+        //Preserve state on rotation
         if (savedInstanceState != null)
         {
             if (savedInstanceState.containsKey("FAVOURITE_IS_CLICKED"))
@@ -137,6 +148,7 @@ public class DetailActivity extends AppCompatActivity {
 
         collapsingToolbarLayout.setTitleEnabled(false);
 
+        //Load backrop and poster image
         Picasso.with(this)
                 .load("http://image.tmdb.org/t/p/w780/" + movie.getBackdropPath())
                 .into(posterIV);
@@ -168,50 +180,6 @@ public class DetailActivity extends AppCompatActivity {
 
         }
     }
-////        // get our previously saved list of favorited books
-////        final ArrayList<Integer> favoritedBookNames =
-////                savedInstanceState.getIntegerArrayList(favoritedMovieNamesKey);
-////
-////        // look at all of your books and figure out which are the favorites
-////        for (String movieName : favoritedMovieNames) {
-////            if (movie.getTitle() == movieName) {
-////                 Drawable pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
-////                 mFavouriteFab.setImageDrawable(pinkFavourite);
-////               }
-////            }
-//    }
-//
-//    //    public class ApiQueryTask extends AsyncTask<URL, Void, String> {
-////
-////        // COMPLETED (26) Override onPreExecute to set the loading indicator to visible
-////        @Override
-////        protected void onPreExecute() {
-////            super.onPreExecute();
-////            mLoadingIndicator.setVisibility(View.VISIBLE);
-////        }
-////
-////        @Override
-////        protected void doInBackground(URL... params) {
-////            getMovieDetailsFromServer();
-////            getMovieTrailerFromServer();
-////            getMovieCreditsFromServer();
-////            return githubSearchResults;
-////        }
-////
-////        @Override
-////        protected void onPostExecute(String githubSearchResults) {
-////            // COMPLETED (27) As soon as the loading is complete, hide the loading indicator
-////            mLoadingIndicator.setVisibility(View.INVISIBLE);
-////            if (githubSearchResults != null && !githubSearchResults.equals("")) {
-////                // COMPLETED (17) Call showJsonDataView if we have valid, non-null results
-////                showJsonDataView();
-////                mSearchResultsTextView.setText(githubSearchResults);
-////            } else {
-////                // COMPLETED (16) Call showErrorMessage if the result is null in onPostExecute
-////                showErrorMessage();
-////            }
-////        }
-////    }
 
     private void populateUI(final Movie movie, final MovieDetails movieDetails) {
         if ((movie == null) || (movieDetails == null)) {
@@ -368,6 +336,26 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Select all favourited movie titles
+     */
+    public ArrayList<String> getFavourites(){
+
+
+        String selectQuery = "SELECT " + FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE +  " FROM " + FavourtiesContract.FavouritesEntry.TABLE_NAME;
+        Cursor cursor      = mDb.rawQuery(selectQuery, null);
+        String[] data      = null;
+        ArrayList<String> itemIds = new ArrayList<String>();
+
+        while(cursor.moveToNext()) {
+            String itemId = cursor.getString(cursor.getColumnIndex(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE));
+            itemIds.add(itemId);
+        }
+        cursor.close();
+
+        return itemIds;
+    }
+
     private void closeOnError() {
         finish();
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
@@ -471,20 +459,12 @@ public class DetailActivity extends AppCompatActivity {
                         profilePath[i] = obj.optString("profile_path");
                         names[i] = obj.optString("name");
                         characters[i] = obj.optString("character");
-//                        System.out.println(profilePath[i]);
                     }
                     mCreditsRecyclerView.setHasFixedSize(true);
                     mLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
                     mCreditsRecyclerView.setLayoutManager(mLayoutManager);
                     CreditsAdapter creditsAdapter = new CreditsAdapter(getApplicationContext(), profilePath, names, characters);
                     mCreditsRecyclerView.setAdapter(creditsAdapter);
-
-//                    mCreditsRecyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                        @Override
-//                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                            launchDetailActivity(position);
-//                        }
-//                    });
 
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
