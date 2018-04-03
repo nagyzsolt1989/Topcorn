@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -63,6 +65,7 @@ public class DetailActivity extends AppCompatActivity {
     MovieCredits movieCredits;
     Context mContext;
     boolean addToFavourites = false, addedToWatchlist = false;
+    Drawable pinkFavourite, blackFavourite;
 
     @BindView(R.id.details_poster_iv) ImageView posterIV;
     @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
@@ -80,6 +83,9 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.credits_recycler_view) RecyclerView mCreditsRecyclerView;
     @BindView(R.id.movie_tagline) TextView mMovieTagline;
 //    @BindView(R.id.progreassIndicator) TextView mLoadingIndicator;
+
+    private static final String favoritedMovieNamesKey = "favoritedMovieNamesKey";
+    final ArrayList<String> favoritedMovieNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +120,21 @@ public class DetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
+        blackFavourite = getResources().getDrawable(R.drawable.ic_favorite);
+
+        if (savedInstanceState != null)
+        {
+            if (savedInstanceState.containsKey("FAVOURITE_IS_CLICKED"))
+            {
+                if (savedInstanceState.getBoolean("FAVOURITE_IS_CLICKED"))
+                    mFavouriteFab.setImageDrawable(pinkFavourite);
+                else
+                    mFavouriteFab.setImageDrawable(blackFavourite);
+            }
+
+        }
+
         collapsingToolbarLayout.setTitleEnabled(false);
 
         Picasso.with(this)
@@ -127,37 +148,70 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-//    public class ApiQueryTask extends AsyncTask<URL, Void, String> {
-//
-//        // COMPLETED (26) Override onPreExecute to set the loading indicator to visible
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            mLoadingIndicator.setVisibility(View.VISIBLE);
-//        }
-//
-//        @Override
-//        protected void doInBackground(URL... params) {
-//            getMovieDetailsFromServer();
-//            getMovieTrailerFromServer();
-//            getMovieCreditsFromServer();
-//            return githubSearchResults;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String githubSearchResults) {
-//            // COMPLETED (27) As soon as the loading is complete, hide the loading indicator
-//            mLoadingIndicator.setVisibility(View.INVISIBLE);
-//            if (githubSearchResults != null && !githubSearchResults.equals("")) {
-//                // COMPLETED (17) Call showJsonDataView if we have valid, non-null results
-//                showJsonDataView();
-//                mSearchResultsTextView.setText(githubSearchResults);
-//            } else {
-//                // COMPLETED (16) Call showErrorMessage if the result is null in onPostExecute
-//                showErrorMessage();
-//            }
-//        }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("FAVOURITE_IS_CLICKED", addToFavourites);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey("FAVOURITE_IS_CLICKED")) {
+                if (savedInstanceState.getBoolean("FAVOURITE_IS_CLICKED"))
+                    mFavouriteFab.setImageDrawable(pinkFavourite);
+                else
+                    mFavouriteFab.setImageDrawable(blackFavourite);
+            }
+
+        }
+    }
+////        // get our previously saved list of favorited books
+////        final ArrayList<Integer> favoritedBookNames =
+////                savedInstanceState.getIntegerArrayList(favoritedMovieNamesKey);
+////
+////        // look at all of your books and figure out which are the favorites
+////        for (String movieName : favoritedMovieNames) {
+////            if (movie.getTitle() == movieName) {
+////                 Drawable pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
+////                 mFavouriteFab.setImageDrawable(pinkFavourite);
+////               }
+////            }
 //    }
+//
+//    //    public class ApiQueryTask extends AsyncTask<URL, Void, String> {
+////
+////        // COMPLETED (26) Override onPreExecute to set the loading indicator to visible
+////        @Override
+////        protected void onPreExecute() {
+////            super.onPreExecute();
+////            mLoadingIndicator.setVisibility(View.VISIBLE);
+////        }
+////
+////        @Override
+////        protected void doInBackground(URL... params) {
+////            getMovieDetailsFromServer();
+////            getMovieTrailerFromServer();
+////            getMovieCreditsFromServer();
+////            return githubSearchResults;
+////        }
+////
+////        @Override
+////        protected void onPostExecute(String githubSearchResults) {
+////            // COMPLETED (27) As soon as the loading is complete, hide the loading indicator
+////            mLoadingIndicator.setVisibility(View.INVISIBLE);
+////            if (githubSearchResults != null && !githubSearchResults.equals("")) {
+////                // COMPLETED (17) Call showJsonDataView if we have valid, non-null results
+////                showJsonDataView();
+////                mSearchResultsTextView.setText(githubSearchResults);
+////            } else {
+////                // COMPLETED (16) Call showErrorMessage if the result is null in onPostExecute
+////                showErrorMessage();
+////            }
+////        }
+////    }
 
     private void populateUI(final Movie movie, final MovieDetails movieDetails) {
         if ((movie == null) || (movieDetails == null)) {
@@ -197,11 +251,17 @@ public class DetailActivity extends AppCompatActivity {
                         mFavouriteFab.setImageDrawable(pinkFavourite);
                         addToFavourites();
                         Toast.makeText(DetailActivity.this, movie.getTitle() + getString(R.string.addedToFavourites), Toast.LENGTH_SHORT).show();
+                        SharedPreferences.Editor editor = getSharedPreferences("Favourite state", MODE_PRIVATE).edit();
+                        editor.putBoolean("State", addToFavourites);
+                        editor.commit();
                     } else if (addToFavourites) {
                         addToFavourites = false;
                         removeFromFavourites();
                         Drawable blackFavourite = getResources().getDrawable(R.drawable.ic_favorite);
                         mFavouriteFab.setImageDrawable(blackFavourite);
+                        SharedPreferences.Editor editor = getSharedPreferences("Favourite state", MODE_PRIVATE).edit();
+                        editor.putBoolean("State", addToFavourites);
+                        editor.commit();
                     }
                 }
             });
@@ -366,19 +426,6 @@ public class DetailActivity extends AppCompatActivity {
                         JSONObject obj = trailersJsonArray.getJSONObject(i);
                         trailers[i] = obj.optString("key");
                     }
-                    mCreditsRecyclerView.setHasFixedSize(true);
-                    mLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
-                    mCreditsRecyclerView.setLayoutManager(mLayoutManager);
-                    CreditsAdapter creditsAdapter = new CreditsAdapter(getApplicationContext(), profilePath, names, characters);
-                    mCreditsRecyclerView.setAdapter(creditsAdapter);
-
-//                    mCreditsRecyclerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                        @Override
-//                        public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                            launchDetailActivity(position);
-//                        }
-//                    });
-
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
                 }

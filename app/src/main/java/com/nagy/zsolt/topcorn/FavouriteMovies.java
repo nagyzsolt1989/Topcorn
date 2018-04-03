@@ -29,6 +29,7 @@ public class FavouriteMovies extends Fragment {
     Context mContext;
     SQLiteDatabase mDb;
     String[] moviePosterPath;
+    static MovieAdapter movieAdapter;
 
     public FavouriteMovies() {
         // Required empty public constructor
@@ -65,7 +66,7 @@ public class FavouriteMovies extends Fragment {
             System.out.println("Ez van benne" + moviePosterPath[i]);
         }
 
-        MovieAdapter movieAdapter = new MovieAdapter(getContext(), moviePosterPath);
+        movieAdapter = new MovieAdapter(getContext(), moviePosterPath);
         gridView.setAdapter(movieAdapter);
 
         movieAdapter.notifyDataSetChanged();
@@ -76,6 +77,17 @@ public class FavouriteMovies extends Fragment {
 //                                            }
 //                                        }
         return layout;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        moviePosterPath = getFavourites();
+        movieAdapter = new MovieAdapter(getContext(), moviePosterPath);
+        gridView.setAdapter(movieAdapter);
+
+//        movieAdapter.notifyDataSetChanged();
+//        gridView.setAdapter(movieAdapter);
     }
 
     public String[] getFavourites(){
