@@ -23,4 +23,5 @@
     <string name="credits">/credits</string>
     <string name="trailers">/videos</string>
     <string name="youtube">https://www.youtube.com/watch?v=</string>
+    <string name="reviews">/reviews</string>
 </resources>

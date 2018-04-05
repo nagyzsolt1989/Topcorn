@@ -31,8 +31,10 @@ import com.nagy.zsolt.topcorn.data.FavourtiesContract;
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
+import com.nagy.zsolt.topcorn.model.MovieReview;
 import com.nagy.zsolt.topcorn.utils.CreditsAdapter;
 import com.nagy.zsolt.topcorn.utils.JsonUtils;
+import com.nagy.zsolt.topcorn.utils.ReviewsAdapter;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -44,20 +46,23 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.nagy.zsolt.topcorn.utils.JsonUtils.parseMovieReviewsJson;
+
 public class DetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
     public static final String EXTRA_JSONARRAY = "extra_jsonarray";
 
-    private LinearLayoutManager mLayoutManager;
+    private LinearLayoutManager mLayoutManager, mReviewsLayoutManager;
     boolean addToFavourites, addedToWatchlist;
-    String[] profilePath, names, characters, trailers;
+    String[] profilePath, names, characters, trailers, ids, authors, contents;
     ArrayList<String> favouritesList;
-    JSONArray creditsJsonArray, trailersJsonArray;
+    JSONArray creditsJsonArray, trailersJsonArray, reviewsJsonArray;
     JSONArray array;
     Movie movie;
     MovieDetails movieDetails;
+    MovieReview movieReview;
     Drawable pinkFavourite, blackFavourite;
     Context mContext;
     SQLiteDatabase mDb;
@@ -76,6 +81,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.button_watchlist) FloatingActionButton mWatchlistFab;
     @BindView(R.id.button_imdb) FloatingActionButton mIMDBFab;
     @BindView(R.id.credits_recycler_view) RecyclerView mCreditsRecyclerView;
+    @BindView(R.id.reviews_recycler_view) RecyclerView mReviewsRecyclerView;
     @BindView(R.id.movie_tagline) TextView mMovieTagline;
 //    @BindView(R.id.progreassIndicator) TextView mLoadingIndicator;
 
@@ -122,6 +128,8 @@ public class DetailActivity extends AppCompatActivity {
             getMovieDetailsFromServer();
             getMovieTrailerFromServer();
             getMovieCreditsFromServer();
+            getMovieReviewsFromServer();
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -199,6 +207,7 @@ public class DetailActivity extends AppCompatActivity {
             mMovieOverview.setText(movie.getOverview());
             mMovieTagline.setText(movieDetails.getTagline());
 
+            mWatchTrailer.setAlpha(0.6f);
             mWatchTrailer.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent();
@@ -299,6 +308,19 @@ public class DetailActivity extends AppCompatActivity {
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(DetailActivity.this, fetchCeditResultListener, url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getMovieReviewsFromServer() {
+        try {
+            //Create Instance of GETAPIRequest and call it's
+            //request() method
+            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.reviews) + getString(R.string.apiKeyParameter) + mContext.getString(R.string.movie_db_api_key);
+            System.out.println(url);
+            GETAPIRequest getapiRequest = new GETAPIRequest();
+            getapiRequest.request(DetailActivity.this, fetchReviewsResultListener, url);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -465,6 +487,57 @@ public class DetailActivity extends AppCompatActivity {
                     mCreditsRecyclerView.setLayoutManager(mLayoutManager);
                     CreditsAdapter creditsAdapter = new CreditsAdapter(getApplicationContext(), profilePath, names, characters);
                     mCreditsRecyclerView.setAdapter(creditsAdapter);
+
+                } else {
+                    RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
+                }
+            } catch (
+                    Exception e) {
+                RequestQueueService.showAlert(getString(R.string.exceptionAlert), DetailActivity.this);
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void onFetchFailure(String msg) {
+            RequestQueueService.cancelProgressDialog();
+            //Show if any error message is there called from GETAPIRequest class
+            RequestQueueService.showAlert(msg, DetailActivity.this);
+        }
+
+        @Override
+        public void onFetchStart() {
+            //Start showing progressbar or any loader you have
+            RequestQueueService.showProgressDialog(DetailActivity.this);
+        }
+    };
+
+    FetchDataListener fetchReviewsResultListener = new FetchDataListener() {
+        @Override
+        public void onFetchComplete(JSONObject data) {
+            //Fetch Complete. Now stop progress bar  or loader
+            //you started in onFetchStart
+            RequestQueueService.cancelProgressDialog();
+            try {
+                //Check result sent by our GETAPIRequest class
+                if (data != null) {
+                    reviewsJsonArray = data.getJSONArray("results");
+                    System.out.println(reviewsJsonArray);
+                    ids = new String[reviewsJsonArray.length()];
+                    authors = new String[reviewsJsonArray.length()];
+                    contents = new String[reviewsJsonArray.length()];
+                    for (int i = 0; i < reviewsJsonArray.length(); i++) {
+                        JSONObject obj = reviewsJsonArray.getJSONObject(i);
+                        ids[i] = obj.optString("id");
+                        authors[i] = obj.optString("author");
+                        contents[i] = obj.optString("content");
+                    }
+                    mReviewsRecyclerView.setHasFixedSize(true);
+                    mReviewsLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
+                    mReviewsRecyclerView.setLayoutManager(mReviewsLayoutManager);
+                    ReviewsAdapter reviewsAdapter = new ReviewsAdapter(getApplicationContext(), ids, authors, contents);
+                    mReviewsRecyclerView.setAdapter(reviewsAdapter);
 
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);

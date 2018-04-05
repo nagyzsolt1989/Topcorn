@@ -3,6 +3,7 @@ package com.nagy.zsolt.topcorn.utils;
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
+import com.nagy.zsolt.topcorn.model.MovieReview;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -127,6 +128,31 @@ public class JsonUtils {
         }
     }
 
+    public static MovieReview parseMovieReviewsJson(String data) {
+
+        String author;
+        String content;
+        String id;
+
+        final String KEY_AUTHOR = "author";
+        final String KEY_CONTENT = "content";
+        final String KEY_ID = "id";
+
+        try {
+
+            JSONObject movieJson = new JSONObject(data);
+
+            author = movieJson.optString(KEY_AUTHOR);
+            content = movieJson.optString(KEY_CONTENT);
+            id = movieJson.optString(KEY_ID);
+
+            return new MovieReview(id, author, content);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     private static ArrayList<String> convertJsonArrayToList(JSONArray jsonArray) {
         ArrayList<String> list = new ArrayList<>();

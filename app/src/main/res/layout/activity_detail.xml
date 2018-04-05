@@ -110,13 +110,13 @@
 
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/button_play"
-                    android:layout_width="58dp"
-                    android:layout_height="58dp"
-                    android:layout_marginStart="45dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="50dp"
                     android:layout_marginTop="235dp"
                     android:scaleType="center"
                     android:src="@drawable/ic_play_arrow"
-                    app:backgroundTint="@color/ratingStarColor"
+                    app:backgroundTint="@color/light_grey"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
 
@@ -129,14 +129,14 @@
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/scroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/colorPrimaryDark"
         android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
             android:orientation="vertical">
 
@@ -144,7 +144,7 @@
                 android:id="@+id/movie_details"
                 layout="@layout/movie_details"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 
         </LinearLayout>
