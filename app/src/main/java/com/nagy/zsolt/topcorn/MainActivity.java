@@ -14,7 +14,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
+import com.adroitandroid.chipcloud.ChipCloud;
 import com.nagy.zsolt.topcorn.api.FetchDataListener;
 import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
@@ -27,17 +29,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+
 public class MainActivity extends AppCompatActivity {
 
     public static SQLiteDatabase mDb;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    String[] moviePosterPath;
-    JSONArray moviesJsonArray;
     Context mContext;
-
-    ArrayList<String> list = new ArrayList<String>();
-    GridView gridView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
-        getSupportActionBar().setIcon(R.drawable.popcorn);
+        getSupportActionBar().setTitle("Topcorn");
+        getSupportActionBar().setLogo(R.drawable.ic_menu_camera);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);

@@ -54,6 +54,7 @@ public class CreditsAdapter extends RecyclerView.Adapter<CreditsAdapter.MyViewHo
     public void onBindViewHolder(MyViewHolder holder, int position) {
         holder.name.setText(names[position]);
         holder.character.setText(characters[position]);
+        holder.character.setAlpha(0.5f);
         Picasso.with(mContext)
                 .load("http://image.tmdb.org/t/p/w92/" + mProfilePath[position])
                 .transform(new CropCircleTransformation())

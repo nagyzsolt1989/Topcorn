@@ -68,7 +68,7 @@ public class DetailActivity extends AppCompatActivity {
     SQLiteDatabase mDb;
 
     @BindView(R.id.details_poster_iv) ImageView posterIV;
-    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
+//    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
     @BindView(R.id.movie_title) TextView mMovieTitle;
     @BindView(R.id.ratingbar) RatingBar mRatingBar;
     @BindView(R.id.movie_release_year) TextView mReleaseYear;
@@ -154,7 +154,7 @@ public class DetailActivity extends AppCompatActivity {
 
         }
 
-        collapsingToolbarLayout.setTitleEnabled(false);
+//        collapsingToolbarLayout.setTitleEnabled(false);
 
         //Load backrop and poster image
         Picasso.with(this)
@@ -206,6 +206,7 @@ public class DetailActivity extends AppCompatActivity {
             }
             mMovieOverview.setText(movie.getOverview());
             mMovieTagline.setText(movieDetails.getTagline());
+            mMovieTagline.setAlpha(0.5f);
 
             mWatchTrailer.setAlpha(0.6f);
             mWatchTrailer.setOnClickListener(new View.OnClickListener() {

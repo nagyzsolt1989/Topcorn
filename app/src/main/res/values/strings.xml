@@ -24,4 +24,5 @@
     <string name="trailers">/videos</string>
     <string name="youtube">https://www.youtube.com/watch?v=</string>
     <string name="reviews">/reviews</string>
+    <string name="logo">logo</string>
 </resources>
