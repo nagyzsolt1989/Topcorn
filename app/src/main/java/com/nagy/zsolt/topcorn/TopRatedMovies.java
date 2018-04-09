@@ -119,6 +119,7 @@ public class TopRatedMovies extends Fragment {
         intent.putExtra(DetailActivity.EXTRA_POSITION, position);
         intent.putExtra(DetailActivity.EXTRA_JSONARRAY, moviesJsonArray.toString());
         startActivity(intent);
+        getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 
 }

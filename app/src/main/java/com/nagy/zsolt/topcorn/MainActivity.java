@@ -1,7 +1,6 @@
 package com.nagy.zsolt.topcorn;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -10,22 +9,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.Toast;
-import android.widget.Toolbar;
-
-import com.adroitandroid.chipcloud.ChipCloud;
-import com.nagy.zsolt.topcorn.api.FetchDataListener;
-import com.nagy.zsolt.topcorn.api.GETAPIRequest;
-import com.nagy.zsolt.topcorn.api.RequestQueueService;
 import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
-import com.nagy.zsolt.topcorn.utils.MovieAdapter;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -13,7 +13,7 @@ public class FavouritesDBHelper extends SQLiteOpenHelper {
     // The database name
     private static final String DATABASE_NAME = "topcorn.db";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public FavouritesDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -37,12 +37,20 @@ public class FavouritesDBHelper extends SQLiteOpenHelper {
                 FavourtiesContract.FavouritesEntry.COLUMN_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 "); ";
 
+        final String SQL_CREATE_WATCHLIST_TABLE = "CREATE TABLE " + WatchlistContract.WatchlistEntry.TABLE_NAME + " (" +
+                WatchlistContract.WatchlistEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
+                WatchlistContract.WatchlistEntry.COLUMN_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                "); ";
+
         sqLiteDatabase.execSQL(SQL_CREATE_FAVOURITES_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_WATCHLIST_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + FavourtiesContract.FavouritesEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WatchlistContract.WatchlistEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }

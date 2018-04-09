@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
 import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
 import com.nagy.zsolt.topcorn.data.FavourtiesContract;
+import com.nagy.zsolt.topcorn.data.WatchlistContract;
 import com.nagy.zsolt.topcorn.model.Movie;
 import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
@@ -57,33 +59,48 @@ public class DetailActivity extends AppCompatActivity {
     private LinearLayoutManager mLayoutManager, mReviewsLayoutManager;
     boolean addToFavourites, addedToWatchlist;
     String[] profilePath, names, characters, trailers, ids, authors, contents;
-    ArrayList<String> favouritesList;
+    ArrayList<String> favouritesList, watchList;
     JSONArray creditsJsonArray, trailersJsonArray, reviewsJsonArray;
     JSONArray array;
+    View mLoadingScreen;
     Movie movie;
     MovieDetails movieDetails;
     MovieReview movieReview;
-    Drawable pinkFavourite, blackFavourite;
+    Drawable pinkFavourite, blackFavourite, blueWatchlist, blackWatchlist;
     Context mContext;
     SQLiteDatabase mDb;
 
-    @BindView(R.id.details_poster_iv) ImageView posterIV;
-//    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
-    @BindView(R.id.movie_title) TextView mMovieTitle;
-    @BindView(R.id.ratingbar) RatingBar mRatingBar;
-    @BindView(R.id.movie_release_year) TextView mReleaseYear;
-    @BindView(R.id.movie_duration) TextView mMovieRuntime;
-    @BindView(R.id.trailer_poster) ImageView mTrailerPoster;
-    @BindView(R.id.movie_overview) TextView mMovieOverview;
-    @BindView(R.id.movie_genre) ChipCloud mMovieGenre;
-    @BindView(R.id.button_play) FloatingActionButton mWatchTrailer;
-    @BindView(R.id.button_favourite) FloatingActionButton mFavouriteFab;
-    @BindView(R.id.button_watchlist) FloatingActionButton mWatchlistFab;
-    @BindView(R.id.button_imdb) FloatingActionButton mIMDBFab;
-    @BindView(R.id.credits_recycler_view) RecyclerView mCreditsRecyclerView;
-    @BindView(R.id.reviews_recycler_view) RecyclerView mReviewsRecyclerView;
-    @BindView(R.id.movie_tagline) TextView mMovieTagline;
-//    @BindView(R.id.progreassIndicator) TextView mLoadingIndicator;
+    @BindView(R.id.details_poster_iv)
+    ImageView posterIV;
+    //    @BindView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
+    @BindView(R.id.movie_title)
+    TextView mMovieTitle;
+    @BindView(R.id.ratingbar)
+    RatingBar mRatingBar;
+    @BindView(R.id.movie_release_year)
+    TextView mReleaseYear;
+    @BindView(R.id.movie_duration)
+    TextView mMovieRuntime;
+    @BindView(R.id.trailer_poster)
+    ImageView mTrailerPoster;
+    @BindView(R.id.movie_overview)
+    TextView mMovieOverview;
+    @BindView(R.id.movie_genre)
+    ChipCloud mMovieGenre;
+    @BindView(R.id.button_play)
+    FloatingActionButton mWatchTrailer;
+    @BindView(R.id.button_favourite)
+    FloatingActionButton mFavouriteFab;
+    @BindView(R.id.button_watchlist)
+    FloatingActionButton mWatchlistFab;
+    @BindView(R.id.button_imdb)
+    FloatingActionButton mIMDBFab;
+    @BindView(R.id.credits_recycler_view)
+    RecyclerView mCreditsRecyclerView;
+    @BindView(R.id.reviews_recycler_view)
+    RecyclerView mReviewsRecyclerView;
+    @BindView(R.id.movie_tagline)
+    TextView mMovieTagline;
 
     private static final String favoritedMovieNamesKey = "favoritedMovieNamesKey";
     final ArrayList<String> favoritedMovieNames = new ArrayList<>();
@@ -98,11 +115,14 @@ public class DetailActivity extends AppCompatActivity {
         mContext = getApplicationContext();
         pinkFavourite = getResources().getDrawable(R.drawable.ic_favorite_pink);
         blackFavourite = getResources().getDrawable(R.drawable.ic_favorite);
+        blueWatchlist = getResources().getDrawable(R.drawable.ic_list_blue);
+        blackWatchlist = getResources().getDrawable(R.drawable.ic_list);
         addToFavourites = false;
         addedToWatchlist = false;
         FavouritesDBHelper dbHelper = new FavouritesDBHelper(mContext);
         mDb = dbHelper.getReadableDatabase();
         favouritesList = getFavourites();
+        watchList = getWatchlist();
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -135,17 +155,19 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         //Preserve Favourite Fab previous state
-        if (favouritesList.contains(movie.getTitle()))
-        {
+        if (favouritesList.contains(movie.getTitle())) {
             addToFavourites = true;
             mFavouriteFab.setImageDrawable(pinkFavourite);
         }
 
+        if (watchList.contains(movie.getTitle())) {
+            addedToWatchlist = true;
+            mWatchlistFab.setImageDrawable(blueWatchlist);
+        }
+
         //Preserve state on rotation
-        if (savedInstanceState != null)
-        {
-            if (savedInstanceState.containsKey("FAVOURITE_IS_CLICKED"))
-            {
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey("FAVOURITE_IS_CLICKED")) {
                 if (savedInstanceState.getBoolean("FAVOURITE_IS_CLICKED"))
                     mFavouriteFab.setImageDrawable(pinkFavourite);
                 else
@@ -154,8 +176,6 @@ public class DetailActivity extends AppCompatActivity {
 
         }
 
-//        collapsingToolbarLayout.setTitleEnabled(false);
-
         //Load backrop and poster image
         Picasso.with(this)
                 .load("http://image.tmdb.org/t/p/w780/" + movie.getBackdropPath())
@@ -163,10 +183,10 @@ public class DetailActivity extends AppCompatActivity {
 
         Picasso.with(this)
                 .load("http://image.tmdb.org/t/p/w780/" + movie.getPosterPath())
-//                .transform(new GrayscaleTransformation())
                 .into(mTrailerPoster);
 
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -250,13 +270,21 @@ public class DetailActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     if (!addedToWatchlist) {
                         addedToWatchlist = true;
-                        Drawable blueWatchlist = getResources().getDrawable(R.drawable.ic_list_blue);
+                        blueWatchlist = getResources().getDrawable(R.drawable.ic_list_blue);
                         mWatchlistFab.setImageDrawable(blueWatchlist);
+                        addToWatchlist();
+                        SharedPreferences.Editor editor = getSharedPreferences("Watchlist state", MODE_PRIVATE).edit();
+                        editor.putBoolean("State", addedToWatchlist);
+                        editor.commit();
                         Toast.makeText(DetailActivity.this, movie.getTitle() + getString(R.string.addedToWatchlist), Toast.LENGTH_SHORT).show();
                     } else if (addedToWatchlist) {
                         addedToWatchlist = false;
-                        Drawable blackFavourite = getResources().getDrawable(R.drawable.ic_list);
-                        mWatchlistFab.setImageDrawable(blackFavourite);
+                        removeFromWatchlist();
+                        blackWatchlist = getResources().getDrawable(R.drawable.ic_list);
+                        mWatchlistFab.setImageDrawable(blackWatchlist);
+                        SharedPreferences.Editor editor = getSharedPreferences("Watchlist state", MODE_PRIVATE).edit();
+                        editor.putBoolean("State", addedToWatchlist);
+                        editor.commit();
                     }
                 }
             });
@@ -267,7 +295,7 @@ public class DetailActivity extends AppCompatActivity {
                     intent.setAction(Intent.ACTION_VIEW);
                     intent.addCategory(Intent.CATEGORY_BROWSABLE);
                     System.out.println(movieDetails.getImdb_id());
-                    intent.setData(Uri.parse(getString(R.string.imdb)+movieDetails.getImdb_id()));
+                    intent.setData(Uri.parse(getString(R.string.imdb) + movieDetails.getImdb_id()));
                     startActivity(intent);
                 }
             });
@@ -328,7 +356,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Adds a new movie to Favourites DB
+     * Adds a new movie to Favourites table
      */
     public long addToFavourites() {
         //ContentValues instance to pass the values onto the insert query
@@ -344,14 +372,13 @@ public class DetailActivity extends AppCompatActivity {
         cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TAGLINE, movieDetails.getTagline());
         cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_IMDB, movieDetails.getImdb_id());
 
-        // COMPLETED (8) call insert to run an insert query on TABLE_NAME with the ContentValues created
         return MainActivity.mDb.insert(FavourtiesContract.FavouritesEntry.TABLE_NAME, null, cv);
     }
 
     /**
      * Removes the movie from Favourites
      */
-    public void removeFromFavourites(){
+    public void removeFromFavourites() {
 
         String selection = FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
         String[] selectionArgs = {movie.getTitle()};
@@ -360,18 +387,59 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     /**
+     * Adds a new movie to watchlist table
+     */
+    public long addToWatchlist() {
+        //ContentValues instance to pass the values onto the insert query
+        ContentValues cv = new ContentValues();
+        cv.put(WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+
+        return MainActivity.mDb.insert(WatchlistContract.WatchlistEntry.TABLE_NAME, null, cv);
+    }
+
+    /**
+     * Removes the movie from watchlist
+     */
+    public void removeFromWatchlist() {
+
+        String selection = WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
+        String[] selectionArgs = {movie.getTitle()};
+        int deletedRows = MainActivity.mDb.delete(WatchlistContract.WatchlistEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
+    /**
      * Select all favourited movie titles
      */
-    public ArrayList<String> getFavourites(){
+    public ArrayList<String> getFavourites() {
 
 
-        String selectQuery = "SELECT " + FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE +  " FROM " + FavourtiesContract.FavouritesEntry.TABLE_NAME;
-        Cursor cursor      = mDb.rawQuery(selectQuery, null);
-        String[] data      = null;
+        String selectQuery = "SELECT " + FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE + " FROM " + FavourtiesContract.FavouritesEntry.TABLE_NAME;
+        Cursor cursor = mDb.rawQuery(selectQuery, null);
+        String[] data = null;
         ArrayList<String> itemIds = new ArrayList<String>();
 
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             String itemId = cursor.getString(cursor.getColumnIndex(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE));
+            itemIds.add(itemId);
+        }
+        cursor.close();
+
+        return itemIds;
+    }
+
+    /**
+     * Select all movies on Watchlist
+     */
+    public ArrayList<String> getWatchlist() {
+
+
+        String selectQuery = "SELECT " + WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " FROM " + WatchlistContract.WatchlistEntry.TABLE_NAME;
+        Cursor cursor = mDb.rawQuery(selectQuery, null);
+        String[] data = null;
+        ArrayList<String> itemIds = new ArrayList<String>();
+
+        while (cursor.moveToNext()) {
+            String itemId = cursor.getString(cursor.getColumnIndex(WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE));
             itemIds.add(itemId);
         }
         cursor.close();
@@ -484,11 +552,10 @@ public class DetailActivity extends AppCompatActivity {
                         characters[i] = obj.optString("character");
                     }
                     mCreditsRecyclerView.setHasFixedSize(true);
-                    mLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
+                    mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
                     mCreditsRecyclerView.setLayoutManager(mLayoutManager);
                     CreditsAdapter creditsAdapter = new CreditsAdapter(getApplicationContext(), profilePath, names, characters);
                     mCreditsRecyclerView.setAdapter(creditsAdapter);
-
                 } else {
                     RequestQueueService.showAlert(getString(R.string.noDataAlert), DetailActivity.this);
                 }
@@ -535,7 +602,7 @@ public class DetailActivity extends AppCompatActivity {
                         contents[i] = obj.optString("content");
                     }
                     mReviewsRecyclerView.setHasFixedSize(true);
-                    mReviewsLayoutManager = new LinearLayoutManager(getApplicationContext(),LinearLayoutManager.HORIZONTAL,false);
+                    mReviewsLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
                     mReviewsRecyclerView.setLayoutManager(mReviewsLayoutManager);
                     ReviewsAdapter reviewsAdapter = new ReviewsAdapter(getApplicationContext(), ids, authors, contents);
                     mReviewsRecyclerView.setAdapter(reviewsAdapter);
