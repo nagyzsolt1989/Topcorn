@@ -4,7 +4,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +33,7 @@ public class FavouriteMovies extends Fragment {
     SQLiteDatabase mDb;
     String[] moviePosterPath;
     static MovieAdapter movieAdapter;
+    Parcelable state, restore;
 
     public FavouriteMovies() {
         // Required empty public constructor
@@ -85,9 +89,9 @@ public class FavouriteMovies extends Fragment {
         moviePosterPath = getFavourites();
         movieAdapter = new MovieAdapter(getContext(), moviePosterPath);
         gridView.setAdapter(movieAdapter);
-
-//        movieAdapter.notifyDataSetChanged();
-//        gridView.setAdapter(movieAdapter);
+        if(restore != null){
+            gridView.onRestoreInstanceState(restore);
+        }
     }
 
     public String[] getFavourites(){
@@ -111,4 +115,20 @@ public class FavouriteMovies extends Fragment {
         return data;
 
     }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        state = gridView.onSaveInstanceState();
+        outState.putParcelable("STATE", state);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            restore = savedInstanceState.getParcelable("STATE");
+        }
+    }
+
 }

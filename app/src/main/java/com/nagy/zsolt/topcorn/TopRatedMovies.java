@@ -7,6 +7,9 @@ package com.nagy.zsolt.topcorn;
         import android.content.Context;
         import android.content.Intent;
         import android.os.Bundle;
+        import android.os.Parcelable;
+        import android.support.annotation.NonNull;
+        import android.support.annotation.Nullable;
         import android.support.v4.app.Fragment;
         import android.view.LayoutInflater;
         import android.view.View;
@@ -27,6 +30,7 @@ public class TopRatedMovies extends Fragment {
     JSONArray moviesJsonArray;
     Context mContext;
     GridView gridView;
+    Parcelable state, restore;
 
     public TopRatedMovies() {
         // Required empty public constructor
@@ -83,6 +87,9 @@ public class TopRatedMovies extends Fragment {
                     }
                     MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
                     gridView.setAdapter(movieAdapter);
+                    if(restore != null){
+                        gridView.onRestoreInstanceState(restore);
+                    }
                     gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -120,6 +127,27 @@ public class TopRatedMovies extends Fragment {
         intent.putExtra(DetailActivity.EXTRA_JSONARRAY, moviesJsonArray.toString());
         startActivity(intent);
         getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        state = gridView.onSaveInstanceState();
+        outState.putParcelable("STATE", state);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            restore = savedInstanceState.getParcelable("STATE");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getTopRatedMovies();
     }
 
 }

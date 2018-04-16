@@ -176,13 +176,26 @@ public class DetailActivity extends AppCompatActivity {
 
         }
 
+        //Build Poster Path URIs
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("http")
+                .authority("image.tmdb.org")
+                .appendPath("t")
+                .appendPath("p")
+                .appendPath("w780");
+        String posterPathPrefix = builder.build().toString();
+
         //Load backrop and poster image
         Picasso.with(this)
-                .load("http://image.tmdb.org/t/p/w780/" + movie.getBackdropPath())
+                .load(posterPathPrefix + movie.getBackdropPath())
+                .placeholder(R.drawable.ic_menu_gallery)
+                .error(R.drawable.mrb_star_icon_black_36dp)
                 .into(posterIV);
 
         Picasso.with(this)
-                .load("http://image.tmdb.org/t/p/w780/" + movie.getPosterPath())
+                .load(posterPathPrefix + movie.getPosterPath())
+                .placeholder(R.drawable.ic_menu_gallery)
+                .error(R.drawable.mrb_star_icon_black_36dp)
                 .into(mTrailerPoster);
 
     }
@@ -233,7 +246,6 @@ public class DetailActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_VIEW);
-                    System.out.println(movieDetails.getImdb_id());
                     intent.setData(Uri.parse(getString(R.string.youtube) + trailers[0]));
                     startActivity(intent);
                 }
@@ -631,5 +643,6 @@ public class DetailActivity extends AppCompatActivity {
             RequestQueueService.showProgressDialog(DetailActivity.this);
         }
     };
+
 
 }

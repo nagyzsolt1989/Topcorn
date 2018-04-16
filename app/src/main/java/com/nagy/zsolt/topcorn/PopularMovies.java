@@ -7,16 +7,21 @@ package com.nagy.zsolt.topcorn;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+
 import com.nagy.zsolt.topcorn.api.FetchDataListener;
 import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
 import com.nagy.zsolt.topcorn.utils.MovieAdapter;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,6 +32,7 @@ public class PopularMovies extends Fragment {
     JSONArray moviesJsonArray;
     Context mContext;
     GridView gridView;
+    Parcelable state, restore;
 
     public PopularMovies() {
     }
@@ -82,6 +88,9 @@ public class PopularMovies extends Fragment {
                     }
                     MovieAdapter movieAdapter = new MovieAdapter(mContext, moviePosterPath);
                     gridView.setAdapter(movieAdapter);
+                    if(restore != null){
+                        gridView.onRestoreInstanceState(restore);
+                    }
                     gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -122,4 +131,24 @@ public class PopularMovies extends Fragment {
         getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        state = gridView.onSaveInstanceState();
+        outState.putParcelable("STATE", state);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            restore = savedInstanceState.getParcelable("STATE");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getPopularMovies();
+    }
 }
