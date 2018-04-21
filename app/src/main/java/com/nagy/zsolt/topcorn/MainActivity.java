@@ -10,28 +10,21 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
-import com.nagy.zsolt.topcorn.data.FavourtiesContract;
-import com.nagy.zsolt.topcorn.data.WatchlistContract;
+import com.nagy.zsolt.topcorn.data.TopcornDBHelper;
+import com.nagy.zsolt.topcorn.data.TopcornContract;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-
 public class MainActivity extends AppCompatActivity {
 
-    public static SQLiteDatabase mDb;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     String[] mWatchist;
@@ -57,8 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
 //        gridView = (GridView) findViewById(R.id.gridview);
 
-        FavouritesDBHelper dbHelper = new FavouritesDBHelper(this);
-        mDb = dbHelper.getWritableDatabase();
+        TopcornDBHelper dbHelper = new TopcornDBHelper(this);
 
         mContext = getApplicationContext();
         mWatchist = getWatchlist();
@@ -101,14 +93,17 @@ public class MainActivity extends AppCompatActivity {
      */
     public String[] getWatchlist() {
 
-
-        String selectQuery = "SELECT " + WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " FROM " + WatchlistContract.WatchlistEntry.TABLE_NAME;
-        Cursor cursor = mDb.rawQuery(selectQuery, null);
+        Cursor cursor =  mContext.getContentResolver().query(
+                TopcornContract.WatchlistEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
         String[] data = null;
         ArrayList<String> itemIds = new ArrayList<String>();
 
         while (cursor.moveToNext()) {
-            String itemId = cursor.getString(cursor.getColumnIndex(WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE));
+            String itemId = cursor.getString(cursor.getColumnIndex(TopcornContract.WatchlistEntry.COLUMN_MOVIE_TITLE));
             itemIds.add(itemId);
         }
         cursor.close();

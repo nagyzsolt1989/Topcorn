@@ -25,4 +25,6 @@
     <string name="youtube">https://www.youtube.com/watch?v=</string>
     <string name="reviews">/reviews</string>
     <string name="logo">logo</string>
+
+    <string name="content_authority">com.nagy.zsolt.topcorn</string>
 </resources>

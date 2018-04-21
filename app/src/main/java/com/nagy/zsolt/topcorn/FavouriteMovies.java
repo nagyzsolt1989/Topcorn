@@ -1,11 +1,11 @@
 package com.nagy.zsolt.topcorn;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,12 +15,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
-import com.nagy.zsolt.topcorn.data.FavourtiesContract;
+import com.nagy.zsolt.topcorn.data.TopcornDBHelper;
+import com.nagy.zsolt.topcorn.data.TopcornContract;
 import com.nagy.zsolt.topcorn.utils.MovieAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Zsolti on 2018.03.19..
@@ -30,7 +29,6 @@ public class FavouriteMovies extends Fragment {
 
     GridView gridView;
     Context mContext;
-    SQLiteDatabase mDb;
     String[] moviePosterPath;
     static MovieAdapter movieAdapter;
     Parcelable state, restore;
@@ -45,9 +43,7 @@ public class FavouriteMovies extends Fragment {
 
         mContext = getContext();
 
-        FavouritesDBHelper dbHelper = new FavouritesDBHelper(mContext);
-        mDb = dbHelper.getReadableDatabase();
-
+        TopcornDBHelper dbHelper = new TopcornDBHelper(mContext);
         moviePosterPath = getFavourites();
 
         for (int i = 0; i < moviePosterPath.length; i++) {
@@ -75,11 +71,11 @@ public class FavouriteMovies extends Fragment {
 
         movieAdapter.notifyDataSetChanged();
 //        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//                                            @Override
-//                                            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                                                launchDetailActivity(position);
-//                                            }
-//                                        }
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                launchDetailActivity(position);
+//            }
+//        });
         return layout;
     }
 
@@ -96,17 +92,20 @@ public class FavouriteMovies extends Fragment {
 
     public String[] getFavourites(){
 
+        Cursor cursor =  mContext.getContentResolver().query(
+                TopcornContract.FavouritesEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
 
-        String selectQuery = "SELECT " + FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_POSTER +  " FROM " + FavourtiesContract.FavouritesEntry.TABLE_NAME;
-        Cursor cursor      = mDb.rawQuery(selectQuery, null);
         String[] data      = null;
         ArrayList<String> itemIds = new ArrayList<String>();
 
 
 
         while(cursor.moveToNext()) {
-//                System.out.println("ez van a cursorban" + cursor.getString(0));
-                String itemId = cursor.getString(cursor.getColumnIndex(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_POSTER));
+                String itemId = cursor.getString(cursor.getColumnIndex(TopcornContract.FavouritesEntry.COLUMN_MOVIE_POSTER));
                 itemIds.add(itemId);
             }
         cursor.close();
@@ -129,6 +128,13 @@ public class FavouriteMovies extends Fragment {
         if (savedInstanceState != null) {
             restore = savedInstanceState.getParcelable("STATE");
         }
+    }
+
+    private void launchDetailActivity(int position) {
+        Intent intent = new Intent(getContext(), DetailActivity.class);
+        intent.putExtra(DetailActivity.EXTRA_POSITION, position);
+        startActivity(intent);
+        getActivity().overridePendingTransition(R.anim.slide_from_right, R.anim.fade_out);
     }
 
 }

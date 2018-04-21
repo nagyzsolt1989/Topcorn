@@ -11,8 +11,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,11 +25,9 @@ import com.adroitandroid.chipcloud.ChipCloud;
 import com.nagy.zsolt.topcorn.api.FetchDataListener;
 import com.nagy.zsolt.topcorn.api.GETAPIRequest;
 import com.nagy.zsolt.topcorn.api.RequestQueueService;
-import com.nagy.zsolt.topcorn.data.FavouritesDBHelper;
-import com.nagy.zsolt.topcorn.data.FavourtiesContract;
-import com.nagy.zsolt.topcorn.data.WatchlistContract;
+import com.nagy.zsolt.topcorn.data.TopcornDBHelper;
+import com.nagy.zsolt.topcorn.data.TopcornContract;
 import com.nagy.zsolt.topcorn.model.Movie;
-import com.nagy.zsolt.topcorn.model.MovieCredits;
 import com.nagy.zsolt.topcorn.model.MovieDetails;
 import com.nagy.zsolt.topcorn.model.MovieReview;
 import com.nagy.zsolt.topcorn.utils.CreditsAdapter;
@@ -47,8 +43,6 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static com.nagy.zsolt.topcorn.utils.JsonUtils.parseMovieReviewsJson;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -68,7 +62,6 @@ public class DetailActivity extends AppCompatActivity {
     MovieReview movieReview;
     Drawable pinkFavourite, blackFavourite, blueWatchlist, blackWatchlist;
     Context mContext;
-    SQLiteDatabase mDb;
 
     @BindView(R.id.details_poster_iv)
     ImageView posterIV;
@@ -119,8 +112,7 @@ public class DetailActivity extends AppCompatActivity {
         blackWatchlist = getResources().getDrawable(R.drawable.ic_list);
         addToFavourites = false;
         addedToWatchlist = false;
-        FavouritesDBHelper dbHelper = new FavouritesDBHelper(mContext);
-        mDb = dbHelper.getReadableDatabase();
+        TopcornDBHelper dbHelper = new TopcornDBHelper(mContext);
         favouritesList = getFavourites();
         watchList = getWatchlist();
 
@@ -370,21 +362,32 @@ public class DetailActivity extends AppCompatActivity {
     /**
      * Adds a new movie to Favourites table
      */
-    public long addToFavourites() {
-        //ContentValues instance to pass the values onto the insert query
-        ContentValues cv = new ContentValues();
+    public void addToFavourites() {
 
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_BACKDROP, movie.getBackdropPath());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_POSTER, movie.getPosterPath());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getReleaseDate());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_RATING, movie.getVoteAvg());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_DURATION, movieDetails.getRuntime());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_OVERVIEW, movie.getOverview());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TAGLINE, movieDetails.getTagline());
-        cv.put(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_IMDB, movieDetails.getImdb_id());
+        new android.os.AsyncTask<Void, Void, Void>() {
 
-        return MainActivity.mDb.insert(FavourtiesContract.FavouritesEntry.TABLE_NAME, null, cv);
+            @Override
+            protected Void doInBackground(Void... params) {
+                 //ContentValues instance to pass the values onto the insert query
+                ContentValues cv = new ContentValues();
+
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_BACKDROP, movie.getBackdropPath());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_POSTER, movie.getPosterPath());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_RELEASE_DATE, movie.getReleaseDate());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_RATING, movie.getVoteAvg());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_DURATION, movieDetails.getRuntime());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_OVERVIEW, movie.getOverview());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_TAGLINE, movieDetails.getTagline());
+                cv.put(TopcornContract.FavouritesEntry.COLUMN_MOVIE_IMDB, movieDetails.getImdb_id());
+
+                mContext.getContentResolver().insert(
+                                       TopcornContract.FavouritesEntry.CONTENT_URI,
+                                       cv);
+                return null;
+                }
+            }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
+
     }
 
     /**
@@ -392,21 +395,44 @@ public class DetailActivity extends AppCompatActivity {
      */
     public void removeFromFavourites() {
 
-        String selection = FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
+        new android.os.AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+
+        String selection = TopcornContract.FavouritesEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
         String[] selectionArgs = {movie.getTitle()};
-        int deletedRows = MainActivity.mDb.delete(FavourtiesContract.FavouritesEntry.TABLE_NAME, selection, selectionArgs);
+
+        mContext.getContentResolver().delete(
+                            TopcornContract.FavouritesEntry.CONTENT_URI,
+                            selection,
+                            selectionArgs);
+
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
 
     }
 
     /**
      * Adds a new movie to watchlist table
      */
-    public long addToWatchlist() {
-        //ContentValues instance to pass the values onto the insert query
-        ContentValues cv = new ContentValues();
-        cv.put(WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+    public void addToWatchlist() {
 
-        return MainActivity.mDb.insert(WatchlistContract.WatchlistEntry.TABLE_NAME, null, cv);
+        new android.os.AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                //ContentValues instance to pass the values onto the insert query
+                ContentValues cv = new ContentValues();
+                cv.put(TopcornContract.WatchlistEntry.COLUMN_MOVIE_TITLE, movie.getTitle());
+
+                mContext.getContentResolver().insert(
+                                            TopcornContract.WatchlistEntry.CONTENT_URI,
+                                            cv);
+                    return null;
+                }
+            }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -414,9 +440,21 @@ public class DetailActivity extends AppCompatActivity {
      */
     public void removeFromWatchlist() {
 
-        String selection = WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
-        String[] selectionArgs = {movie.getTitle()};
-        int deletedRows = MainActivity.mDb.delete(WatchlistContract.WatchlistEntry.TABLE_NAME, selection, selectionArgs);
+        new android.os.AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                String selection = TopcornContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " LIKE ?";
+                String[] selectionArgs = {movie.getTitle()};
+
+                 mContext.getContentResolver().delete(
+                                            TopcornContract.WatchlistEntry.CONTENT_URI,
+                                            selection,
+                                            selectionArgs);
+                return null;
+            }
+        }.executeOnExecutor(android.os.AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -424,14 +462,17 @@ public class DetailActivity extends AppCompatActivity {
      */
     public ArrayList<String> getFavourites() {
 
-
-        String selectQuery = "SELECT " + FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE + " FROM " + FavourtiesContract.FavouritesEntry.TABLE_NAME;
-        Cursor cursor = mDb.rawQuery(selectQuery, null);
+        Cursor cursor =  mContext.getContentResolver().query(
+                TopcornContract.FavouritesEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
         String[] data = null;
         ArrayList<String> itemIds = new ArrayList<String>();
 
         while (cursor.moveToNext()) {
-            String itemId = cursor.getString(cursor.getColumnIndex(FavourtiesContract.FavouritesEntry.COLUMN_MOVIE_TITLE));
+            String itemId = cursor.getString(cursor.getColumnIndex(TopcornContract.FavouritesEntry.COLUMN_MOVIE_TITLE));
             itemIds.add(itemId);
         }
         cursor.close();
@@ -444,14 +485,17 @@ public class DetailActivity extends AppCompatActivity {
      */
     public ArrayList<String> getWatchlist() {
 
-
-        String selectQuery = "SELECT " + WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE + " FROM " + WatchlistContract.WatchlistEntry.TABLE_NAME;
-        Cursor cursor = mDb.rawQuery(selectQuery, null);
+        Cursor cursor =  mContext.getContentResolver().query(
+                TopcornContract.WatchlistEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
         String[] data = null;
         ArrayList<String> itemIds = new ArrayList<String>();
 
         while (cursor.moveToNext()) {
-            String itemId = cursor.getString(cursor.getColumnIndex(WatchlistContract.WatchlistEntry.COLUMN_MOVIE_TITLE));
+            String itemId = cursor.getString(cursor.getColumnIndex(TopcornContract.WatchlistEntry.COLUMN_MOVIE_TITLE));
             itemIds.add(itemId);
         }
         cursor.close();
