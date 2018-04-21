@@ -10,13 +10,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.nagy.zsolt.topcorn.data.TopcornDBHelper;
 import com.nagy.zsolt.topcorn.data.TopcornContract;
 
@@ -35,12 +28,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Display app logo
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayUseLogoEnabled(true);
-        getSupportActionBar().setTitle("Topcorn");
-        getSupportActionBar().setLogo(R.drawable.ic_menu_camera);
+//        getSupportActionBar().setIcon(R.drawable.ic_laun);
+//        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -55,26 +44,26 @@ public class MainActivity extends AppCompatActivity {
         mContext = getApplicationContext();
         mWatchist = getWatchlist();
 
-        // Create the AccountHeader
-        AccountHeader headerResult = new AccountHeaderBuilder()
-                .withActivity(this)
-                .addProfiles(
-                        new ProfileDrawerItem().withName("Watchlist")
-                )
-                .build();
-
-        Drawer result = new DrawerBuilder()
-                .withActivity(this)
-                .withTranslucentStatusBar(false)
-                .withActionBarDrawerToggle(false)
-                .withAccountHeader(headerResult)
-                .build();
-
-        for (int i = 0; i < mWatchist.length; i++) {
-            System.out.println("Ezek a favouritek:" + mWatchist[i]);
-            System.out.println(mWatchist.length);
-            result.addItem(new PrimaryDrawerItem().withName(mWatchist[i]).withIdentifier(i).withSelectable(false));
-        }
+//        // Create the AccountHeader
+//        AccountHeader headerResult = new AccountHeaderBuilder()
+//                .withActivity(this)
+//                .withHeaderBackground(R.layout.navigation_drawer_header)
+//                .addProfiles(
+//                        new ProfileDrawerItem().withName("Watchlist")
+//                )
+//                .build();
+//
+//        Drawer result = new DrawerBuilder()
+//                .withActivity(this)
+//                .withTranslucentStatusBar(false)
+//                .withActionBarDrawerToggle(false)
+//                .withAccountHeader(headerResult)
+//                .build();
+//
+//        for (int i = 0; i < mWatchist.length; i++) {
+//            System.out.println(mWatchist.length);
+//            result.addItem(new PrimaryDrawerItem().withName(mWatchist[i]).withIdentifier(i).withSelectable(false));
+//        }
     }
 
     /**
