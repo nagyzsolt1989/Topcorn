@@ -23,6 +23,8 @@ package com.nagy.zsolt.topcorn;
         import org.json.JSONArray;
         import org.json.JSONObject;
 
+        import static com.nagy.zsolt.topcorn.BuildConfig.ApiKey;
+
 
 public class TopRatedMovies extends Fragment {
 
@@ -59,7 +61,7 @@ public class TopRatedMovies extends Fragment {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url =  getString(R.string.movieDbApi) + getString(R.string.topRated) + getString(R.string.apiKeyParameter)+mContext.getString(R.string.movie_db_api_key);
+            String url =  getString(R.string.movieDbApi) + getString(R.string.topRated) + getString(R.string.apiKeyParameter) + ApiKey;
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(getContext(), fetchGetResultListener, url);

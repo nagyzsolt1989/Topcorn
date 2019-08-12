@@ -10,12 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark"
-        android:columnWidth="130dp"
-        android:gravity="center"
+        android:columnWidth="110dp"
         android:paddingTop="10dp"
-        android:horizontalSpacing="10dp"
-        android:numColumns="auto_fit"
+        android:numColumns="3"
         android:stretchMode="spacingWidthUniform"
-        android:verticalSpacing="24dp"/>
+        android:verticalSpacing="20dp"
+        android:horizontalSpacing="0dp"/>
 
 </FrameLayout>

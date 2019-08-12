@@ -49,6 +49,9 @@ public class DetailActivity extends AppCompatActivity {
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
     public static final String EXTRA_JSONARRAY = "extra_jsonarray";
+    public static final String apiKey = BuildConfig.ApiKey;
+    private static final String favoritedMovieNamesKey = "favoritedMovieNamesKey";
+    final ArrayList<String> favoritedMovieNames = new ArrayList<>();
 
     private LinearLayoutManager mLayoutManager, mReviewsLayoutManager;
     boolean addToFavourites, addedToWatchlist;
@@ -94,9 +97,6 @@ public class DetailActivity extends AppCompatActivity {
     RecyclerView mReviewsRecyclerView;
     @BindView(R.id.movie_tagline)
     TextView mMovieTagline;
-
-    private static final String favoritedMovieNamesKey = "favoritedMovieNamesKey";
-    final ArrayList<String> favoritedMovieNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -311,7 +311,7 @@ public class DetailActivity extends AppCompatActivity {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.apiKeyParameter) + mContext.getString(R.string.movie_db_api_key);
+            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.apiKeyParameter) + apiKey;
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(DetailActivity.this, fetchGetResultListener, url);
@@ -324,7 +324,7 @@ public class DetailActivity extends AppCompatActivity {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.trailers) + getString(R.string.apiKeyParameter) + mContext.getString(R.string.movie_db_api_key);
+            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.trailers) + getString(R.string.apiKeyParameter) + apiKey;
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(DetailActivity.this, fetchTrailerResultListener, url);
@@ -337,7 +337,7 @@ public class DetailActivity extends AppCompatActivity {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.credits) + getString(R.string.apiKeyParameter) + mContext.getString(R.string.movie_db_api_key);
+            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.credits) + getString(R.string.apiKeyParameter) + apiKey;
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(DetailActivity.this, fetchCeditResultListener, url);
@@ -350,7 +350,7 @@ public class DetailActivity extends AppCompatActivity {
         try {
             //Create Instance of GETAPIRequest and call it's
             //request() method
-            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.reviews) + getString(R.string.apiKeyParameter) + mContext.getString(R.string.movie_db_api_key);
+            String url = getString(R.string.movieDbApi) + movie.getId() + getString(R.string.reviews) + getString(R.string.apiKeyParameter) + apiKey;
             System.out.println(url);
             GETAPIRequest getapiRequest = new GETAPIRequest();
             getapiRequest.request(DetailActivity.this, fetchReviewsResultListener, url);
